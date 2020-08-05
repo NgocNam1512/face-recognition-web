@@ -11,4 +11,4 @@ Face recognition with face_recognition and flask
 - Run file app.py
 
 ## Demo
-
+![alt text](https://github.com/NgocNam1512/face-recognition-web/blob/master/demo.jpg?raw=true)
