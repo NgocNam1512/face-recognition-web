@@ -1,4 +1,4 @@
-# Face Rocognition Web
+# Face Recognition Web
 Face recognition with face_recognition and flask
 
 ## To do list
