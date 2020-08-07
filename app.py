@@ -1,6 +1,7 @@
 from flask import Flask, render_template, Response
 from camera import VideoCamera
 import face_recognition
+import time
 import os
 
 app = Flask(__name__)
@@ -12,10 +13,12 @@ known_face_names = []
 
 known_filename = os.listdir(KNOWN_DIR)
 for filename in known_filename:
+    start = time.time()
     image = face_recognition.api.load_image_file(KNOWN_DIR + filename)
     face_encoding = face_recognition.api.face_encodings(image)[0]
     known_face_names.append(filename.replace(".jpg", ""))
     known_face_encodings.append(face_encoding)
+    print("Encoding known face:", time.time() - start)
 
 @app.route('/')
 def index():

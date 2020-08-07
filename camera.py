@@ -15,28 +15,22 @@ class VideoCamera(object):
 
     def get_frame(self, known_face_encodings, known_face_names):
         # Grab a single frame of video
-        ret, frame = self.video.read()
+        _, frame = self.video.read()
 
         # Resize frame of video to 1/4 size for faster face recognition processing
-        small_frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+        small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
 
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = small_frame[:, :, ::-1]
 
         face_locations = face_recognition.api.face_locations(rgb_small_frame)
-        top, right, bottom, left = 0, 0, 0, 0
-        for (top, right, bottom, left) in face_locations:
-        # Scale back up face locations since the frame we detected in was scaled to 1/4 size
-            top *= 2
-            right *= 2
-            bottom *= 2
-            left *= 2
-        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-        name = "Unknown"
         start = time.time()
+        name = "Unknown"
         face_encodings = face_recognition.api.face_encodings(rgb_small_frame, face_locations, model='small')
+        print("Time encoding:", time.time() - start)
 
+        start = time.time()
         for face_encoding in face_encodings:
             matches = face_recognition.api.compare_faces(known_face_encodings, face_encoding)
 
@@ -45,10 +39,20 @@ class VideoCamera(object):
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
         end = time.time()
-        print(end-start)
-        
+        print("Match time:", end-start)
+
+        start = time.time()
+        top, right, bottom, left = 0, 0, 0, 0
+        for (top, right, bottom, left) in face_locations:
+        # Scale back up face locations since the frame we detected in was scaled to 1/4 size
+            top *= 4
+            right *= 4
+            bottom *= 4
+            left *= 4
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, top - 10), font, 1.0, (255, 255, 255), 1)
+        print("Draw time: ", time.time() - start)
         
-        ret, jpg = cv2.imencode('.jpg', frame)
+        _, jpg = cv2.imencode('.jpg', frame)
         return jpg.tobytes()
